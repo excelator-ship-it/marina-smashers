@@ -5,7 +5,7 @@ import {
   Crown, Trophy, Users, UserPlus, X, Trash2, RotateCw,
   Play, Feather, Utensils, Check, Calendar, Plus,
   RefreshCw, Sun, Moon, AlertTriangle, Share2, Save, ClipboardCopy,
-  Lock, LockOpen, ChevronDown, ChevronUp, KeyRound, Camera, CalendarCheck, Download, Share
+  Lock, LockOpen, ChevronDown, ChevronUp, KeyRound, Camera, CalendarCheck, Download, Share, Pencil
 } from "lucide-react";
 
 // Hash the passcode so the readable database only ever holds a hash, not the code.
@@ -270,6 +270,8 @@ export default function App() {
   const [openSession, setOpenSession] = useState(null); // register session key expanded
   const [lightbox, setLightbox] = useState(null); // photo url being viewed full-screen
   const [uploadingKey, setUploadingKey] = useState(null); // "rIdx-mIdx" currently uploading
+  const [editRound, setEditRound] = useState(null); // round index being hand-edited
+  const [swapSel, setSwapSel] = useState(null); // { rIdx, slot } first tapped player
   const [installEvt, setInstallEvt] = useState(null); // Android/Chrome deferred install prompt
   const [installHintOpen, setInstallHintOpen] = useState(false); // iOS "add to home screen" hint
   const [signups, setSignups] = useState([]);
@@ -701,6 +703,37 @@ export default function App() {
       copy[idx] = makeRound(activePlayers, prior);
       return copy;
     });
+  };
+
+  // Manual round editing: tap two players to swap their positions.
+  const slotKey = (s) => (s.kind === "rest" ? `r${s.idx}` : `${s.mIdx}-${s.team}-${s.slot}`);
+  const applySwap = (rIdx, s1, s2) => {
+    setRounds((rs) => rs.map((r, i) => {
+      if (i !== rIdx) return r;
+      const matches = r.matches.map((m) => ({ ...m, teamA: [...m.teamA], teamB: [...m.teamB] }));
+      const resting = [...r.resting];
+      const get = (s) => (s.kind === "rest" ? resting[s.idx] : matches[s.mIdx][s.team][s.slot]);
+      const set = (s, v) => { if (s.kind === "rest") resting[s.idx] = v; else matches[s.mIdx][s.team][s.slot] = v; };
+      const p1 = get(s1), p2 = get(s2);
+      set(s1, p2); set(s2, p1);
+      [s1, s2].forEach((s) => { if (s.kind === "match") { matches[s.mIdx].scoreA = ""; matches[s.mIdx].scoreB = ""; } });
+      return { ...r, matches, resting };
+    }));
+  };
+  const swapTap = (rIdx, slot) => {
+    if (!swapSel) { setSwapSel({ rIdx, slot }); return; }
+    if (swapSel.rIdx === rIdx && slotKey(swapSel.slot) === slotKey(slot)) { setSwapSel(null); return; }
+    applySwap(rIdx, swapSel.slot, slot);
+    setSwapSel(null);
+  };
+  const playerToken = (id, rIdx, slot) => {
+    if (editRound !== rIdx) return <span key={slotKey(slot)} className="bd-pl">{nameOf(id)}</span>;
+    const sel = swapSel && swapSel.rIdx === rIdx && slotKey(swapSel.slot) === slotKey(slot);
+    return (
+      <button key={slotKey(slot)} className={"bd-pl editable" + (sel ? " sel" : "")} onClick={() => swapTap(rIdx, slot)}>
+        {nameOf(id)}
+      </button>
+    );
   };
   const deleteRound = (idx) => { snapshotSession(); setRounds((rs) => rs.filter((_, i) => i !== idx)); };
 
@@ -1206,19 +1239,30 @@ export default function App() {
                       {canEdit && (
                         <div className="bd-round-tools">
                           {rIdx === rounds.length - 1 && (
+                            <button className={"bd-mini" + (editRound === rIdx ? " on" : "")} onClick={() => { setEditRound(editRound === rIdx ? null : rIdx); setSwapSel(null); }}>
+                              <Pencil size={13} /> {editRound === rIdx ? "Done" : "Edit"}
+                            </button>
+                          )}
+                          {rIdx === rounds.length - 1 && editRound !== rIdx && (
                             <button className="bd-mini" onClick={() => rerollRound(rIdx)}>
                               <RotateCw size={13} /> Reroll
                             </button>
                           )}
-                          <button
-                            className="bd-mini danger"
-                            onClick={() => ask("Delete round " + (rIdx + 1) + "?", "Its scores will be removed.", () => deleteRound(rIdx))}
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                          {editRound !== rIdx && (
+                            <button
+                              className="bd-mini danger"
+                              onClick={() => ask("Delete round " + (rIdx + 1) + "?", "Its scores will be removed.", () => deleteRound(rIdx))}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
+
+                    {editRound === rIdx && (
+                      <p className="bd-edit-hint">Tap two players to swap them. Changing a game clears its score.</p>
+                    )}
 
                     {r.matches.map((m, mIdx) => {
                       const na = m.scoreA === "" ? null : Number(m.scoreA);
@@ -1233,15 +1277,15 @@ export default function App() {
                           <span className="bd-court-tag">Court {mIdx + 1}</span>
                           <div className="bd-net">
                             <div className={"bd-side" + (aWin ? " win" : draw ? " draw" : "")}>
-                              {m.teamA.map((id) => <span key={id} className="bd-pl">{nameOf(id)}</span>)}
-                              <input className="bd-score" inputMode="numeric" placeholder="–" readOnly={!canEdit}
+                              {m.teamA.map((id, si) => playerToken(id, rIdx, { kind: "match", mIdx, team: "teamA", slot: si }))}
+                              <input className="bd-score" inputMode="numeric" placeholder="–" readOnly={!canEdit || editRound === rIdx}
                                 value={m.scoreA} onChange={(e) => setScore(rIdx, mIdx, "A", e.target.value)} />
                               {done && <span className={"bd-pts " + chip(aWin)[1]}>{chip(aWin)[0]}</span>}
                             </div>
                             <div className="bd-vs">vs</div>
                             <div className={"bd-side" + (bWin ? " win" : draw ? " draw" : "")}>
-                              {m.teamB.map((id) => <span key={id} className="bd-pl">{nameOf(id)}</span>)}
-                              <input className="bd-score" inputMode="numeric" placeholder="–" readOnly={!canEdit}
+                              {m.teamB.map((id, si) => playerToken(id, rIdx, { kind: "match", mIdx, team: "teamB", slot: si }))}
+                              <input className="bd-score" inputMode="numeric" placeholder="–" readOnly={!canEdit || editRound === rIdx}
                                 value={m.scoreB} onChange={(e) => setScore(rIdx, mIdx, "B", e.target.value)} />
                               {done && <span className={"bd-pts " + chip(bWin)[1]}>{chip(bWin)[0]}</span>}
                             </div>
@@ -1271,7 +1315,9 @@ export default function App() {
                     {r.resting.length > 0 && (
                       <div className="bd-rest">
                         <span>Resting</span>
-                        {r.resting.map((id) => <em key={id}>{nameOf(id)}</em>)}
+                        {r.resting.map((id, ri2) => editRound === rIdx
+                          ? playerToken(id, rIdx, { kind: "rest", idx: ri2 })
+                          : <em key={id}>{nameOf(id)}</em>)}
                       </div>
                     )}
                   </div>
@@ -1896,6 +1942,11 @@ const CSS = `
 .bd-round-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .bd-round-head h2{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.5px;margin:0;}
 .bd-round-tools{display:flex;gap:6px;}
+.bd-mini.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+.bd-edit-hint{font-size:12px;color:var(--gold);margin:-4px 0 12px;font-weight:600;}
+.bd-pl.editable{background:var(--panel-2);border:1.5px solid var(--line);border-radius:8px;padding:4px 9px;cursor:pointer;font:inherit;color:var(--ink);font-weight:600;transition:.12s;}
+.bd-pl.editable:hover{border-color:var(--accent);}
+.bd-pl.editable.sel{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
 .bd-mini{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;font-family:inherit;border:1.5px solid var(--line);background:var(--panel);color:var(--soft);border-radius:8px;padding:5px 8px;cursor:pointer;}
 .bd-mini:hover{border-color:var(--muted);}
 .bd-mini.danger{color:var(--clay);}
