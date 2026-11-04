@@ -96,7 +96,10 @@ function ratingsFrom(rounds) {
 }
 // Score all 3 ways to split 4 players into 2 teams; pick the one that best avoids
 // repeat partners/opponents first, then favours balanced strong+weak teams.
-function bestSplit(four, rating, partner, opponent, key, wImb, wSpread) {
+// For 4 players, choose the team split that: (1) avoids repeat partners above all,
+// then (2) keeps the match as close as possible, then (3) nudges away from repeat opponents.
+function bestSplit(four, rating, partner, opponent, key, wBalance) {
+  const rOf = (id) => rating[id] || 0;
   const splits = [
     [[four[0], four[1]], [four[2], four[3]]],
     [[four[0], four[2]], [four[1], four[3]]],
@@ -104,14 +107,9 @@ function bestSplit(four, rating, partner, opponent, key, wImb, wSpread) {
   ];
   let teams = null, best = Infinity;
   for (const [A, B] of splits) {
-    let c = 0;
-    c += (partner[key(A[0], A[1])] || 0) * 1000; // avoiding repeat partners dominates
-    c += (partner[key(B[0], B[1])] || 0) * 1000;
-    A.forEach((a) => B.forEach((b) => (c += (opponent[key(a, b)] || 0) * 40)));
-    const rs = [...A, ...B].map((id) => rating[id] || 0).sort((x, y) => y - x);
-    const imbalance = Math.abs((rs[0] + rs[3]) - (rs[1] + rs[2]));
-    const spread = rs[0] - rs[3];
-    c += imbalance * wImb - spread * wSpread;
+    let c = (partner[key(A[0], A[1])] || 0) * 2000 + (partner[key(B[0], B[1])] || 0) * 2000; // full rotation: everyone partners everyone
+    c += Math.abs((rOf(A[0]) + rOf(A[1])) - (rOf(B[0]) + rOf(B[1]))) * wBalance;              // keep the match close
+    A.forEach((a) => B.forEach((b) => (c += (opponent[key(a, b)] || 0) * 10)));                // mild opponent variety
     if (c < best) { best = c; teams = { teamA: A, teamB: B }; }
   }
   return { teams, cost: best };
@@ -131,18 +129,18 @@ function makeRound(players, rounds) {
   });
   const resting = ordered.slice(0, restCount);
   const active = ordered.slice(restCount);
+  if (active.length < 4) return { id: uid(), matches: [], resting };
 
   const { partner, opponent, key } = historyCounts(rounds);
-  const W_IMBALANCE = 2; // keep the two teams' strength close
-  const W_SPREAD = 2;    // reward pairing a strong player with a weak one
+  const W_BALANCE = 30; // match closeness — strong, but always below the no-repeat priority
 
   let best = null, bestC = Infinity;
-  for (let t = 0; t < 1200; t++) {
+  for (let t = 0; t < 2000; t++) {
     const s = shuffle(active);
     const matches = [];
     let total = 0;
     for (let i = 0; i < s.length; i += 4) {
-      const bs = bestSplit([s[i], s[i + 1], s[i + 2], s[i + 3]], rating, partner, opponent, key, W_IMBALANCE, W_SPREAD);
+      const bs = bestSplit([s[i], s[i + 1], s[i + 2], s[i + 3]], rating, partner, opponent, key, W_BALANCE);
       matches.push({ ...bs.teams, scoreA: "", scoreB: "" });
       total += bs.cost;
     }
