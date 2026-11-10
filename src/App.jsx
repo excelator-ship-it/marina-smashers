@@ -1,6 +1,7 @@
 /* Marina Smashers — Dubai Marina · doubles badminton scoreboard */
 import { useState, useEffect, useMemo, useRef } from "react";
 import { kvGet, kvSet, uploadPhoto, deletePhoto } from "./storage";
+import { makeRound, historyRatings, tiersFor, matchLabel, classifyMatch } from "./pairing";
 import {
   Crown, Trophy, Users, UserPlus, X, Trash2, RotateCw,
   Play, Feather, Utensils, Check, Calendar, Plus,
@@ -66,88 +67,7 @@ function computeStats(players, rounds) {
   return stats;
 }
 
-function historyCounts(rounds) {
-  const partner = {}, opponent = {};
-  const key = (a, b) => [a, b].sort().join("|");
-  const bump = (obj, a, b) => (obj[key(a, b)] = (obj[key(a, b)] || 0) + 1);
-  rounds.forEach((r) =>
-    r.matches.forEach((m) => {
-      bump(partner, m.teamA[0], m.teamA[1]);
-      bump(partner, m.teamB[0], m.teamB[1]);
-      m.teamA.forEach((a) => m.teamB.forEach((b) => bump(opponent, a, b)));
-    })
-  );
-  return { partner, opponent, key };
-}
-
-// Within-session skill signal: average point-difference per completed game (0 if none yet).
-function ratingsFrom(rounds) {
-  const acc = {};
-  rounds.forEach((rd) => rd.matches.forEach((m) => {
-    const a = m.scoreA === "" ? null : Number(m.scoreA);
-    const b = m.scoreB === "" ? null : Number(m.scoreB);
-    if (a == null || b == null || isNaN(a) || isNaN(b)) return;
-    m.teamA.forEach((id) => { (acc[id] = acc[id] || { d: 0, g: 0 }); acc[id].d += a - b; acc[id].g++; });
-    m.teamB.forEach((id) => { (acc[id] = acc[id] || { d: 0, g: 0 }); acc[id].d += b - a; acc[id].g++; });
-  }));
-  const r = {};
-  for (const id in acc) r[id] = acc[id].g ? acc[id].d / acc[id].g : 0;
-  return r;
-}
-// Score all 3 ways to split 4 players into 2 teams; pick the one that best avoids
-// repeat partners/opponents first, then favours balanced strong+weak teams.
-// For 4 players, choose the team split that: (1) avoids repeat partners above all,
-// then (2) keeps the match as close as possible, then (3) nudges away from repeat opponents.
-function bestSplit(four, rating, partner, opponent, key, wBalance) {
-  const rOf = (id) => rating[id] || 0;
-  const splits = [
-    [[four[0], four[1]], [four[2], four[3]]],
-    [[four[0], four[2]], [four[1], four[3]]],
-    [[four[0], four[3]], [four[1], four[2]]],
-  ];
-  let teams = null, best = Infinity;
-  for (const [A, B] of splits) {
-    let c = (partner[key(A[0], A[1])] || 0) * 2000 + (partner[key(B[0], B[1])] || 0) * 2000; // full rotation: everyone partners everyone
-    c += Math.abs((rOf(A[0]) + rOf(A[1])) - (rOf(B[0]) + rOf(B[1]))) * wBalance;              // keep the match close
-    A.forEach((a) => B.forEach((b) => (c += (opponent[key(a, b)] || 0) * 10)));                // mild opponent variety
-    if (c < best) { best = c; teams = { teamA: A, teamB: B }; }
-  }
-  return { teams, cost: best };
-}
-
-function makeRound(players, rounds) {
-  const ids = players.map((p) => p.id);
-  const n = ids.length;
-  const restCount = n % 4;
-  const stats = computeStats(players, rounds);
-  const rating = ratingsFrom(rounds);
-
-  const ordered = shuffle(ids).sort((a, b) => {
-    const ma = stats[a].matches, mb = stats[b].matches;
-    if (ma !== mb) return mb - ma;
-    return stats[a].rests - stats[b].rests;
-  });
-  const resting = ordered.slice(0, restCount);
-  const active = ordered.slice(restCount);
-  if (active.length < 4) return { id: uid(), matches: [], resting };
-
-  const { partner, opponent, key } = historyCounts(rounds);
-  const W_BALANCE = 30; // match closeness — strong, but always below the no-repeat priority
-
-  let best = null, bestC = Infinity;
-  for (let t = 0; t < 2000; t++) {
-    const s = shuffle(active);
-    const matches = [];
-    let total = 0;
-    for (let i = 0; i < s.length; i += 4) {
-      const bs = bestSplit([s[i], s[i + 1], s[i + 2], s[i + 3]], rating, partner, opponent, key, W_BALANCE);
-      matches.push({ ...bs.teams, scoreA: "", scoreB: "" });
-      total += bs.cost;
-    }
-    if (total < bestC) { bestC = total; best = matches; }
-  }
-  return { id: uid(), matches: best || [], resting };
-}
+// Round generation lives in ./pairing.js (rule-ordered: no repeat partners, tier rules, fair rests, balance).
 
 /* ---------------- storage (shared = whole group) ---------------- */
 
@@ -330,6 +250,9 @@ export default function App() {
   const canEdit = lock ? unlocked : true;
   const activePlayers = players.filter((p) => !p.left);
   const leftPlayers = players.filter((p) => p.left);
+  const histRatings = useMemo(() => historyRatings(history), [history]);
+  const tiers = useMemo(() => tiersFor(activePlayers, rounds, histRatings), [activePlayers, rounds, histRatings]);
+  const TIER_NAME = { S: "Strong", M: "Mid", W: "Weak" };
 
   const ask = (message, detail, onYes) => setConfirm({ message, detail, onYes });
 
@@ -685,7 +608,7 @@ export default function App() {
   const doStart = () => {
     if (activePlayers.length < 4) return;
     saveKey(K_ROSTER, activePlayers.map((x) => x.name), true);
-    setRounds((rs) => [...rs, makeRound(activePlayers, rs)]);
+    setRounds((rs) => [...rs, makeRound(activePlayers, rs, histRatings)]);
     setTab("matches");
   };
   const addRound = () => {
@@ -698,7 +621,7 @@ export default function App() {
     setRounds((rs) => {
       const prior = rs.slice(0, idx);
       const copy = rs.slice();
-      copy[idx] = makeRound(activePlayers, prior);
+      copy[idx] = makeRound(activePlayers, prior, histRatings, { fresh: true });
       return copy;
     });
   };
@@ -1150,6 +1073,12 @@ export default function App() {
                     <li key={p.id} className="bd-chip">
                       <span className="bd-chip-num">{i + 1}</span>
                       <span className="bd-chip-name">{p.name}</span>
+                      {tiers[p.id] && (
+                        <span className={"bd-tier " + tiers[p.id].tier}
+                          title={TIER_NAME[tiers[p.id].tier] + (tiers[p.id].games ? ` · ${tiers[p.id].rating >= 0 ? "+" : ""}${tiers[p.id].rating.toFixed(1)} pts/game over ${tiers[p.id].games} games` : " · no record yet")}>
+                          {tiers[p.id].tier}
+                        </span>
+                      )}
                       {canEdit && (
                         <button onClick={() => removePlayer(p.id)} aria-label={"Remove " + p.name}>
                           <X size={15} />
@@ -1273,6 +1202,15 @@ export default function App() {
                       return (
                         <div key={mIdx} className="bd-court">
                           <span className="bd-court-tag">Court {mIdx + 1}</span>
+                          {m.teamA.every((id) => tiers[id]) && m.teamB.every((id) => tiers[id]) && (() => {
+                            const kind = classifyMatch(m, r.matches.filter((_, j) => j !== mIdx), tiers);
+                            return (
+                              <span className={"bd-court-type" + (kind === 2 ? " warn" : kind === 1 ? " ext" : "")}
+                                title={kind === 2 ? "Outside the pairing rules — no rule-clean option was left" : kind === 1 ? "Allowed match-up not named in the rules" : "Within the pairing rules"}>
+                                {matchLabel(m, tiers)}
+                              </span>
+                            );
+                          })()}
                           <div className="bd-net">
                             <div className={"bd-side" + (aWin ? " win" : draw ? " draw" : "")}>
                               {m.teamA.map((id, si) => playerToken(id, rIdx, { kind: "match", mIdx, team: "teamA", slot: si }))}
@@ -1856,6 +1794,10 @@ const CSS = `
 .bd-chip{display:flex;align-items:center;gap:8px;background:var(--panel);border:1.5px solid var(--line);border-radius:11px;padding:7px 9px 7px 8px;}
 .bd-chip-num{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:12px;color:var(--on-accent);background:var(--accent);width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
 .bd-chip-name{font-size:14px;font-weight:500;}
+.bd-tier{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.5px;line-height:1;padding:3px 5px;border-radius:5px;border:1px solid var(--line);color:var(--muted);}
+.bd-tier.S{color:var(--on-accent);background:var(--accent);border-color:var(--accent);}
+.bd-tier.M{color:var(--ink);}
+
 .bd-chip button{border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;padding:2px;border-radius:5px;}
 .bd-chip button:hover{color:var(--clay);background:var(--clay-bg);}
 .bd-leftgroup{margin-top:14px;}
@@ -1952,6 +1894,9 @@ const CSS = `
 
 .bd-court{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;position:relative;}
 .bd-court-tag{position:absolute;top:-8px;left:14px;background:var(--accent);color:var(--on-accent);font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:6px;}
+.bd-court-type{position:absolute;top:-8px;right:14px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:6px;background:var(--panel);border:1px solid var(--line);color:var(--muted);}
+.bd-court-type.ext{color:var(--ink);}
+.bd-court-type.warn{color:#b45309;border-color:#b45309;}
 .bd-net{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin-top:4px;}
 .bd-side{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:10px;transition:.15s;}
 .bd-side.win{background:var(--gold-bg);}
