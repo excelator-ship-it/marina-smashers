@@ -321,6 +321,14 @@ export function planAhead(players, rounds, tiers, horizon, budgetMs, gapCap = In
   return { plan: bestPlan, complete: bestPlan.length >= horizon };
 }
 
+// A round's stored plan was computed from the line-up at the time. Once a round is edited
+// by hand (or an earlier round is deleted) that plan no longer describes the session, so the
+// next round must re-plan from the real state. Call this on the edited round and every later one.
+export function dropPlan(round) {
+  if (!round || !round.meta || !round.meta.plan || !round.meta.plan.length) return round;
+  return { ...round, meta: { ...round.meta, plan: [] } };
+}
+
 // players: [{id,name}]  rounds: previous rounds this session  hist: historyRatings(history)
 // opts.fresh = true ignores the plan stored on the previous round (used by Reroll)
 export function makeRound(players, rounds, hist, opts = {}) {
@@ -340,7 +348,11 @@ export function makeRound(players, rounds, hist, opts = {}) {
     const everyone = [...c.resting, ...c.matches.flatMap((m) => [...m.teamA, ...m.teamB])];
     if (everyone.length === players.length && everyone.every((id) => ids.has(id))) {
       const sc = scoreRound(c.matches, ctx);
-      if (sc.repeats === 0 && sc.illegal === 0) {
+      // The planned rest must still be fair: a hand edit may have made someone rest early.
+      const want = c.resting.slice().sort().join(",");
+      const fairRest = restingOptions(players, rounds, cnt, players.length % 4)
+        .some((opt) => opt.slice().sort().join(",") === want);
+      if (sc.repeats === 0 && sc.illegal === 0 && fairRest) {
         return { id: uid(), matches: c.matches.map((m) => ({ ...m, scoreA: "", scoreB: "" })), resting: c.resting,
           meta: { repeats: 0, illegal: 0, ext: sc.ext, planned: stored.length, plan: stored.slice(1) } };
       }

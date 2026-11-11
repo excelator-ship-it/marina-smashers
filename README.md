@@ -101,9 +101,16 @@ A few match-ups the rules do not name (e.g. Strong+Mid v Mid+Weak) are allowed
 but used sparingly; they are needed whenever a Strong player is resting. The
 generator plans the whole night ahead so it does not run out of legal pairings
 by round 7 or 8. Each court shows its match-up (e.g. `S+W vs S+M`); an amber
-label means no rule-clean option was left (small groups run out quickly: with
-8 players there are only 7 no-repeat rounds in total, and only 6 that also
+label means the match is outside the rules, either because the round was edited
+by hand or because no rule-clean option was left (small groups run out quickly:
+with 8 players there are only 7 no-repeat rounds in total, and only 6 that also
 satisfy the tier rules).
+
+Rounds can be edited by tapping two players to swap them. Every swap counts as a
+partnership for the no-repeat rule and makes the generator re-plan the rest of
+the night from the new line-up, so swaps are best kept for late arrivals and
+early leavers; a swap that reuses a partnership or breaks a tier rule is shown
+in amber on that court.
 
 The player tier badges (S / M / W) are on the Players tab; hover or long-press
 one to see the record behind it.

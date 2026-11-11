@@ -1,7 +1,7 @@
 /* Marina Smashers — Dubai Marina · doubles badminton scoreboard */
 import { useState, useEffect, useMemo, useRef } from "react";
 import { kvGet, kvSet, uploadPhoto, deletePhoto } from "./storage";
-import { makeRound, historyRatings, tiersFor, matchLabel, classifyMatch } from "./pairing";
+import { makeRound, dropPlan, historyRatings, tiersFor, matchLabel, classifyMatch } from "./pairing";
 import {
   Crown, Trophy, Users, UserPlus, X, Trash2, RotateCw,
   Play, Feather, Utensils, Check, Calendar, Plus,
@@ -630,6 +630,7 @@ export default function App() {
   const slotKey = (s) => (s.kind === "rest" ? `r${s.idx}` : `${s.mIdx}-${s.team}-${s.slot}`);
   const applySwap = (rIdx, s1, s2) => {
     setRounds((rs) => rs.map((r, i) => {
+      if (i > rIdx) return dropPlan(r); // later plans were built from the old line-up
       if (i !== rIdx) return r;
       const matches = r.matches.map((m) => ({ ...m, teamA: [...m.teamA], teamB: [...m.teamB] }));
       const resting = [...r.resting];
@@ -638,7 +639,7 @@ export default function App() {
       const p1 = get(s1), p2 = get(s2);
       set(s1, p2); set(s2, p1);
       [s1, s2].forEach((s) => { if (s.kind === "match") { matches[s.mIdx].scoreA = ""; matches[s.mIdx].scoreB = ""; } });
-      return { ...r, matches, resting };
+      return dropPlan({ ...r, matches, resting });
     }));
   };
   const swapTap = (rIdx, slot) => {
@@ -656,7 +657,10 @@ export default function App() {
       </button>
     );
   };
-  const deleteRound = (idx) => { snapshotSession(); setRounds((rs) => rs.filter((_, i) => i !== idx)); };
+  const deleteRound = (idx) => {
+    snapshotSession();
+    setRounds((rs) => rs.filter((_, i) => i !== idx).map((r, i) => (i >= idx ? dropPlan(r) : r)));
+  };
 
   const setScore = (rIdx, mIdx, side, val) => {
     const clean = val.replace(/[^\d]/g, "").slice(0, 3);
@@ -1206,7 +1210,7 @@ export default function App() {
                             const kind = classifyMatch(m, r.matches.filter((_, j) => j !== mIdx), tiers);
                             return (
                               <span className={"bd-court-type" + (kind === 2 ? " warn" : kind === 1 ? " ext" : "")}
-                                title={kind === 2 ? "Outside the pairing rules — no rule-clean option was left" : kind === 1 ? "Allowed match-up not named in the rules" : "Within the pairing rules"}>
+                                title={kind === 2 ? "Outside the pairing rules (edited by hand, or no rule-clean option was left)" : kind === 1 ? "Allowed match-up not named in the rules" : "Within the pairing rules"}>
                                 {matchLabel(m, tiers)}
                               </span>
                             );
