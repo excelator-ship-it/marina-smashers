@@ -115,6 +115,30 @@ in amber on that court.
 The player tier badges (S / M / W) are on the Players tab; hover or long-press
 one to see the record behind it.
 
+`npm run check` simulates nights on realistic rosters (including hand-edited
+rounds) and fails if any generated round breaks these guardrails: repeat
+partners, rule breaks without a flag, unfair or back-to-back rests, a player
+missing from a round, or generation slower than 4 seconds.
+
+---
+
+## Development workflow (Claude Code agents)
+
+Changes are made by a small pipeline run from Claude Code with `/ship-feature <task>`:
+
+1. **Lead** (the main session) gathers context from `CLAUDE.md`, the code and, when
+   needed, live data, and writes a brief.
+2. **Coder** sub-agent implements the brief on the session's `claude/...` branch,
+   runs `npm run build` and `npm run check`, commits and pushes.
+3. **Tester** sub-agent independently checks out the branch, re-runs the guardrail
+   check, replays sample rounds against the pairing rules and reports pass/fail
+   with evidence. Failures go back to the coder.
+4. **Reviewer** sub-agent checks the README, `CLAUDE.md` and code comments are
+   updated for the change and prepares a merge summary. `main` is fast-forwarded
+   only after a human approves in chat; Vercel then deploys it.
+
+Agent roles live in `.claude/agents/`, the pipeline in `.claude/skills/ship-feature/`.
+
 ---
 
 ## Security (please read)

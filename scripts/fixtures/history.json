@@ -1,0 +1,574 @@
+[
+ {
+  "date": "Nov 10, 2026",
+  "rounds": 7,
+  "standings": [
+   {
+    "name": "Ashish",
+    "points": 12,
+    "wins": 6,
+    "draws": 0,
+    "losses": 1,
+    "diff": 25
+   },
+   {
+    "name": "Sajith",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 1,
+    "diff": 28
+   },
+   {
+    "name": "Surya",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 1,
+    "diff": 22
+   },
+   {
+    "name": "Baid",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 3,
+    "diff": 5
+   },
+   {
+    "name": "Tanmoy",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 4,
+    "diff": 5
+   },
+   {
+    "name": "Vijay",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 4,
+    "diff": -12
+   },
+   {
+    "name": "Ejas",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 5,
+    "diff": -20
+   },
+   {
+    "name": "Sankalp",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 4,
+    "diff": -22
+   },
+   {
+    "name": "Maloo",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 5,
+    "diff": -31
+   }
+  ]
+ },
+ {
+  "date": "Nov 5, 2026",
+  "rounds": 9,
+  "standings": [
+   {
+    "name": "Ashish",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 9
+   },
+   {
+    "name": "Sajith",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 2,
+    "diff": 13
+   },
+   {
+    "name": "Arjun",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 3,
+    "diff": 6
+   },
+   {
+    "name": "Baid",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 4,
+    "diff": 1
+   },
+   {
+    "name": "Sankalp",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 5,
+    "diff": -29
+   }
+  ]
+ },
+ {
+  "date": "Nov 3, 2026",
+  "rounds": 7,
+  "standings": [
+   {
+    "name": "Arjun",
+    "points": 12,
+    "wins": 6,
+    "draws": 0,
+    "losses": 1,
+    "diff": 29
+   },
+   {
+    "name": "Sajith",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 19
+   },
+   {
+    "name": "Ejas",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 18
+   },
+   {
+    "name": "Ashish",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 4,
+    "diff": 14
+   },
+   {
+    "name": "Tanmoy",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 4,
+    "diff": -2
+   },
+   {
+    "name": "Sankalp",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 4,
+    "diff": -29
+   },
+   {
+    "name": "Baid",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 5,
+    "diff": -20
+   },
+   {
+    "name": "Surya",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 6,
+    "diff": -29
+   }
+  ]
+ },
+ {
+  "date": "Oct 27, 2026",
+  "rounds": 10,
+  "standings": [
+   {
+    "name": "Sajith",
+    "points": 12,
+    "wins": 6,
+    "draws": 0,
+    "losses": 1,
+    "diff": 37
+   },
+   {
+    "name": "Vijay",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 2,
+    "diff": 4
+   },
+   {
+    "name": "Ashish",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 4,
+    "diff": 2
+   },
+   {
+    "name": "Arjun",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 4,
+    "diff": -14
+   },
+   {
+    "name": "Baid",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 7,
+    "diff": -29
+   }
+  ]
+ },
+ {
+  "date": "Oct 24, 2026",
+  "rounds": 9,
+  "standings": [
+   {
+    "name": "Ejas",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 0,
+    "diff": 25
+   },
+   {
+    "name": "Baid",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 2,
+    "diff": 10
+   },
+   {
+    "name": "Ashish",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 4,
+    "diff": 5
+   },
+   {
+    "name": "Sajith",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 3,
+    "diff": 1
+   },
+   {
+    "name": "Arjun",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 4,
+    "diff": -12
+   },
+   {
+    "name": "Surya",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 5,
+    "diff": -29
+   }
+  ]
+ },
+ {
+  "date": "Oct 11, 2026",
+  "rounds": 7,
+  "standings": [
+   {
+    "name": "Ashish",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 1,
+    "diff": 16
+   },
+   {
+    "name": "Arjun",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 2,
+    "diff": 21
+   },
+   {
+    "name": "Vijay",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 1,
+    "diff": 17
+   },
+   {
+    "name": "Sankalp",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 2,
+    "diff": -3
+   },
+   {
+    "name": "Ejas",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 3,
+    "diff": -14
+   },
+   {
+    "name": "Maloo",
+    "points": 0,
+    "wins": 0,
+    "draws": 0,
+    "losses": 5,
+    "diff": -37
+   }
+  ]
+ },
+ {
+  "date": "Oct 6, 2026",
+  "rounds": 7,
+  "standings": [
+   {
+    "name": "Ashish",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 29
+   },
+   {
+    "name": "Tanmoy",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 27
+   },
+   {
+    "name": "Ejas",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 19
+   },
+   {
+    "name": "Arjun",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 3,
+    "diff": 6
+   },
+   {
+    "name": "Vijay",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 3,
+    "diff": 6
+   },
+   {
+    "name": "Surya",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 5,
+    "diff": -8
+   },
+   {
+    "name": "Sankalp",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 5,
+    "diff": -28
+   },
+   {
+    "name": "Maloo",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 6,
+    "diff": -51
+   }
+  ]
+ },
+ {
+  "date": "Aug 18, 2026",
+  "rounds": 7,
+  "standings": [
+   {
+    "name": "Arjun",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 21
+   },
+   {
+    "name": "Ashish",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 17
+   },
+   {
+    "name": "Sajith",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 13
+   },
+   {
+    "name": "Ejas",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 3,
+    "diff": 10
+   },
+   {
+    "name": "Sankalp",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 3,
+    "diff": -8
+   },
+   {
+    "name": "Vijay",
+    "points": 6,
+    "wins": 3,
+    "draws": 0,
+    "losses": 4,
+    "diff": 5
+   },
+   {
+    "name": "Tanmoy",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 5,
+    "diff": -16
+   },
+   {
+    "name": "Surya",
+    "points": 0,
+    "wins": 0,
+    "draws": 0,
+    "losses": 7,
+    "diff": -42
+   }
+  ]
+ },
+ {
+  "date": "Aug 16, 2026",
+  "rounds": 8,
+  "standings": [
+   {
+    "name": "Arjun",
+    "points": 10,
+    "wins": 5,
+    "draws": 0,
+    "losses": 2,
+    "diff": 25
+   },
+   {
+    "name": "Ashish",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 3,
+    "diff": 12
+   },
+   {
+    "name": "Vijay",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 2,
+    "diff": 7
+   },
+   {
+    "name": "Sankalp",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 4,
+    "diff": -22
+   },
+   {
+    "name": "Tanmoy",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 5,
+    "diff": -22
+   }
+  ]
+ },
+ {
+  "date": "Aug 14, 2026",
+  "rounds": 4,
+  "standings": [
+   {
+    "name": "Sajith",
+    "points": 8,
+    "wins": 4,
+    "draws": 0,
+    "losses": 0,
+    "diff": 25
+   },
+   {
+    "name": "Ashish",
+    "points": 4,
+    "wins": 2,
+    "draws": 0,
+    "losses": 2,
+    "diff": 3
+   },
+   {
+    "name": "Arjun",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 3,
+    "diff": -9
+   },
+   {
+    "name": "Sankalp",
+    "points": 2,
+    "wins": 1,
+    "draws": 0,
+    "losses": 3,
+    "diff": -19
+   }
+  ]
+ }
+]
