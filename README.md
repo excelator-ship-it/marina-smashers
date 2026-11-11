@@ -106,7 +106,17 @@ label means no rule-clean option was left (small groups run out quickly: with
 satisfy the tier rules).
 
 The player tier badges (S / M / W) are on the Players tab; hover or long-press
-one to see the record behind it.
+one to see the record behind it. Three details worth knowing:
+
+- **Tiers are relative to tonight's roster.** With 5 players the split is
+  2 Strong / 1 Mid / 2 Weak, so a usually-Strong player can show as Mid on a
+  small night. From 8 players up it is the top 4 / next 2 / rest.
+- **The all-time record counts once a player has 6 games in History.** Until
+  then the badge comes from tonight's scores (or is a placeholder with no
+  record, treated as Mid-ish until games are played).
+- **Same person, different spellings.** History has "Baid" while the roster
+  may say "Abhishek"; the `ALIASES` map at the top of `src/pairing.js` joins
+  them. Add a line there if another player's name changes.
 
 ---
 
