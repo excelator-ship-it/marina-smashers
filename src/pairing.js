@@ -216,14 +216,18 @@ const MAX_EXHAUSTIVE = 8; // on-court players; above this we sample instead of e
 function restingOptions(players, rounds, cnt, restCount) {
   if (restCount === 0) return [[]];
   const last = rounds.length ? new Set(rounds[rounds.length - 1].resting || []) : new Set();
-  // fewest rests first; among ties, most games played; never twice in a row if avoidable
+  // fewest rests first; among ties, most games played
   const ids = players.map((p) => p.id).sort((a, b) =>
     cnt.rests[a] - cnt.rests[b] || cnt.matches[b] - cnt.matches[a]);
-  const minRest = cnt.rests[ids[0]];
-  let pool = ids.filter((id) => cnt.rests[id] === minRest && !last.has(id));
-  if (pool.length < restCount) pool = ids.filter((id) => cnt.rests[id] === minRest);
-  if (pool.length < restCount) pool = ids.slice(0, Math.max(restCount, Math.min(ids.length, restCount + 3)));
-  return combos(pool, restCount);
+  // Everyone with fewer rests than the restCount-th fewest must sit out; the remaining seats
+  // go to players tied at that level, preferring those who did not rest last round.
+  const cutoff = cnt.rests[ids[restCount - 1]];
+  const must = ids.filter((id) => cnt.rests[id] < cutoff);
+  let tie = ids.filter((id) => cnt.rests[id] === cutoff);
+  const need = restCount - must.length;
+  const fresh = tie.filter((id) => !last.has(id));
+  if (fresh.length >= need) tie = fresh;
+  return combos(tie, need).map((c) => must.concat(c));
 }
 
 export function candidateRounds(players, rounds, ctx) {
