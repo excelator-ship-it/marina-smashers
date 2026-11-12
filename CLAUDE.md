@@ -11,9 +11,13 @@ with public read/write policies. There is no backend code.
 - `src/App.jsx` — the whole UI (one file). Rounds are generated in `addRound`, rerolled in
   `rerollRound`, hand-edited in `applySwap`, deleted in `deleteRound`.
 - `src/storage.js` — Supabase `kv` get/set and photo upload.
-- `scripts/check-guardrails.mjs` — simulation that asserts the pairing guardrails (`npm run check`).
+- `scripts/check-guardrails.mjs` — simulation on 5/8/9/10-player nights that asserts the pairing guardrails (`npm run check`).
 - `scripts/fixtures/history.json` — standings snapshot used by the check.
 - `README.md` — user-facing docs, including “How rounds are paired” and the agent workflow.
+
+## Roster sizes
+Nights have 5, 8, 9 or 10 players. No other size occurs, so do not design, test or document
+for 6 or 7 (the code tolerates them, nothing more).
 
 ## Pairing rules (must never regress)
 Tiers come from all-time point difference per game in History: top 4 Strong, next 2 Mid,

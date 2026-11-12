@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Guardrail check for the round generator (src/pairing.js).
  *
- * Simulates whole nights on realistic rosters using the standings snapshot in
+ * Simulates whole nights on the roster sizes that actually occur (5, 8, 9, 10) using the standings snapshot in
  * scripts/fixtures/history.json, including nights where the group hand-edits
  * rounds (tap-to-swap) after generation. Exits non-zero if any guardrail fails.
  *
@@ -28,12 +28,13 @@ const hr = historyRatings(history);
 const NIGHTS = Number(process.argv[2]) || 6;
 const MAX_MS = 4000;
 
+// Real nights have 5, 8, 9 or 10 players. Nothing else is tested because nothing else happens.
 const ROSTERS = [
   ["Sajith", "Ashish", "Baid", "Sankalp", "Surya", "Tanmoy", "Ejas", "Vijay", "Maloo"],      // 9
   ["Sajith", "Ashish", "Baid", "Sankalp", "Surya", "Tanmoy", "Ejas", "Vijay"],               // 8
   ["Sajith", "Ashish", "Arjun", "Sankalp", "Surya", "Tanmoy", "Ejas", "Vijay", "Maloo", "Baid"], // 10
   ["Sajith", "Ashish", "Sankalp", "Surya", "Ejas"],                                          // 5
-  ["Sajith", "Ashish", "Baid", "Sankalp", "Surya", "Tanmoy", "Newbie"],                      // 7, one with no record
+  ["Sajith", "Ashish", "Baid", "Sankalp", "Surya", "Tanmoy", "Ejas", "Vijay", "Maloo", "Newbie"], // 10, one with no record
 ];
 
 const pk = (a, b) => (a < b ? a + "|" + b : b + "|" + a);
@@ -114,7 +115,7 @@ for (const roster of ROSTERS) {
     const edits = night % 2 === 1;
     const players = roster.map((n, i) => ({ id: "p" + i, name: n }));
     const n = players.length;
-    const nRounds = Math.min(8, Math.max(2, maxNoRepeatRounds(n)) + (n === 8 ? 0 : 0));
+    const nRounds = Math.min(8, Math.max(2, maxNoRepeatRounds(n)));
     let rounds = [];
     for (let i = 0; i < nRounds; i++) {
       const t0 = Date.now();

@@ -11,7 +11,7 @@ Procedure:
 2. `npm install` if needed, then `npm run build` and `npm run check -- 10`. Paste the output tails.
 3. Replay sample rounds yourself with a node script in your scratchpad that imports
    `src/pairing.js` (see `scripts/check-guardrails.mjs` for the pattern). Cover at least:
-   rosters of 5, 8 and 9 players; a night where rounds are hand-edited after generation
+   rosters of 5, 8, 9 and 10 players (the only sizes that occur); a night where rounds are hand-edited after generation
    (`dropPlan` then `makeRound`); Reroll (`makeRound(..., { fresh: true })`). For every generated
    round check: no repeat partners while possible, no unflagged rule break, fair rests, every
    player placed once, generation under 4 s.
